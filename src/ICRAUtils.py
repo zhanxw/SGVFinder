@@ -1,5 +1,5 @@
 from functools import wraps
-from StringIO import StringIO
+from io import StringIO
 from datetime import datetime
 from logging import StreamHandler, Filter, WARNING
 import logging

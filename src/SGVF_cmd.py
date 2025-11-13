@@ -36,7 +36,7 @@ if __name__ == '__main__':
     _addargs(parser)
     args = parser.parse_args()
     samp_to_map = {splitext(basename(f))[0]: _load_ujsn(f) for f in glob(args.input_glob)}
-    if args.byother:
+    if args.byorig:
         vsgv, dsgv = calculate_by_other(join(split(realpath(__file__))[0], '../DataFiles/orig_dsgv.df'),
                            join(split(realpath(__file__))[0], '../DataFiles/orig_vsgv.df'),
                            join(split(realpath(__file__))[0], '../DataFiles/orig_frames'), 

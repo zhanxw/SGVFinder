@@ -20,5 +20,5 @@ if __name__ == '__main__':
     _addargs(parser)
     args = parser.parse_args()
     mp = get_sample_map(args.deltaf, args.x_coverage, args.average_read_length, args.rate_param)
-    with open(args.outf, 'wb') as of:
+    with open(args.outf, 'w') as of:
         ujson.dump(mp, of, double_precision=100)

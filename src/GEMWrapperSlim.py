@@ -6,7 +6,7 @@ from ICRAUtils import _shell_command, _tryrm
 log_ = logging.getLogger(__name__)
 
 GEM_BIN = 'gem-mapper'
-statslinergx = re.compile('.* -- #(\d+) sequences processed$')
+statslinergx = re.compile(r'.* -- #(\d+) sequences processed$')
 
 def _dope(input1, input2, output_prefix, indexf, qual_format="offset-33", qual_thresh=26,
          mismatch = 0.04, editdistance = 0.04, min_matched_bases=0.8, bigindellength=15,
@@ -43,7 +43,7 @@ def _dose(input1, output_prefix, indexf, qual_format="offset-33", qual_thresh=26
 def dope_w_badread_removal(input1, input2, output_prefix, **kwargs):
     suc, startnum = _dope(input1, input2, output_prefix, **kwargs) 
     if not suc:
-        _bad_reads_removal((startnum / 2) - 1e4, 3e4, (input1, input2), output_prefix, kwargs)
+        _bad_reads_removal((startnum // 2) - 1e4, 3e4, (input1, input2), output_prefix, kwargs)
     _tryrm(output_prefix + '_short_1.fastq')
     _tryrm(output_prefix + '_short_2.fastq')
 
@@ -58,11 +58,11 @@ def _bad_reads_removal(startnum, scope, fs, outpref, kwargs):
         
     ex_reads = set()
     _find_fn_reads(rdss, outpref + '_tmp', range(int(scope)), kwargs, ex_reads)
-    with open(fs[0]) as i1, open(outpref + ('_tmp_1.fastq' if len(fs) == 2 else '_tmp.fastq'), 'wb') as o1:
-        o1.writelines(l for i, l in enumerate(i1) if (i/4) - startnum not in ex_reads)
+    with open(fs[0]) as i1, open(outpref + ('_tmp_1.fastq' if len(fs) == 2 else '_tmp.fastq'), 'w') as o1:
+        o1.writelines(l for i, l in enumerate(i1) if (i//4) - startnum not in ex_reads)
     if len(fs) == 2:
-        with open(fs[1]) as i2, open(outpref + '_tmp_2.fastq', 'wb') as o2:
-            o2.writelines(l for i, l in enumerate(i2) if (i/4) - startnum not in ex_reads)
+        with open(fs[1]) as i2, open(outpref + '_tmp_2.fastq', 'w') as o2:
+            o2.writelines(l for i, l in enumerate(i2) if (i//4) - startnum not in ex_reads)
     log_.info('Removed %s reads' % len(ex_reads))
     _tryrm(outpref + '_short.fastq')
     _tryrm(outpref + '_short_1.fastq')
@@ -147,10 +147,10 @@ def _write_reads(rdss, o_prefix):
     else:
         n1 = o_prefix + '.fastq'
         
-    with open(n1, 'wb') as o1:
+    with open(n1, 'w') as o1:
         SeqIO.write(rdss[0], o1, 'fastq')
     if len(rdss) == 2:
-        with open(n2, 'wb') as o2:
+        with open(n2, 'w') as o2:
             SeqIO.write(rdss[1], o2, 'fastq')
     return (n1, n2) if len(rdss) == 2 else (n1, )
     

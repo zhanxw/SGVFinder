@@ -41,7 +41,7 @@ def single_file(fq1, fq2, outfol, max_mismatch, consider_lengths, epsilon, \
                               min_reads, average_read_length, max_mismatch, \
                               lengthdb, dense_region_coverage, consider_lengths, \
                               length_minimum, length_maximum, epsilon, max_iterations, use_theta)
-    with open(join(outfol, basename(pmpf).replace('.pmp', '.jsdel')), 'wb') as of:
+    with open(join(outfol, basename(pmpf).replace('.pmp', '.jsdel')), 'w') as of:
         ujson.dump(delta, of, double_precision=100)
     return pmpf.replace('.pmp', '.jsdel')
 
@@ -54,27 +54,27 @@ def _initialize(fq1, fq2, pmpf, seqdict, max_mismatch, consider_lengths, \
     lengthdb = _get_len_dct(seqdict, dest_dict)
     read_container = ReadContainer()
     pe = fq2 is not None 
-    allowed_dests = {k for k,v in lengthdb.iteritems() if length_minimum <= v <= length_maximum}
+    allowed_dests = {k for k,v in lengthdb.items() if length_minimum <= v <= length_maximum}
     for sr in _load_from_file(pmpf): 
         read_container.add_pmp_sr(sr, pe, allowed_dests, max_mismatch, None, seqdict, dest_dict)
     del dest_dict, allowed_dests, seqdict
     pi = read_container.get_pi()
     
-    read_container.remove_dests([k for k,val in pi.iteritems() if val<=min_reads])
-    pi = {k:val for k, val in pi.iteritems() if  val > min_reads}
+    read_container.remove_dests([k for k,val in pi.items() if val<=min_reads])
+    pi = {k:val for k, val in pi.items() if  val > min_reads}
     
     read_container.init_cov_dict(pi, min_bins, max_bins, min_reads, average_read_length, lengthdb)
     #note: this will create a fully updated coverage dict in the process
     #(in the original implementation this was explicit and not implicit)
     pi = read_container.get_dense_region_coverage_pi(dense_region_coverage) 
     
-    read_container.remove_dests([k for k,val in pi.iteritems() if val<=min_reads])
-    pi =  {k:v for k,v in pi.iteritems() if v>min_reads}
+    read_container.remove_dests([k for k,val in pi.items() if val<=min_reads])
+    pi =  {k:v for k,v in pi.items() if v>min_reads}
     
     if consider_lengths:
-        pi = {k:(v/(lengthdb[k] - (2 * average_read_length))) for k, v in pi.iteritems()}
-    pisum = sum(pi.itervalues())
-    pi = {k:v/float(pisum) for k,v in pi.iteritems()}
+        pi = {k:(v/(lengthdb[k] - (2 * average_read_length))) for k, v in pi.items()}
+    pisum = sum(pi.values())
+    pi = {k:v/float(pisum) for k,v in pi.items()}
     
     theta1 = read_container.get_theta() if use_theta else None
     
@@ -94,8 +94,8 @@ def _runIterative(pi, theta1, read_container, min_bins, max_bins, min_reads, ave
         prevPi = pi
         #reminder: implicitly creates an updated covdic
         pi = read_container.get_dense_region_coverage_pi(dense_region_coverage, delta)
-        read_container.remove_dests([k for k,val in pi.iteritems() if val<min_reads])
-        pi =  {k:v for k,v in pi.iteritems() if v>=min_reads}
+        read_container.remove_dests([k for k,val in pi.items() if val<min_reads])
+        pi =  {k:v for k,v in pi.items() if v>=min_reads}
         
         if len(pi) == 0:
             log_.info("No adequately covered strains found")
@@ -104,11 +104,11 @@ def _runIterative(pi, theta1, read_container, min_bins, max_bins, min_reads, ave
         theta1 = read_container.get_theta() if use_theta else None
         
         if consider_lengths:
-            pi = {k:(v/(lengthdb[k] - (2 * average_read_length))) for k, v in pi.iteritems()}
-        pisum = sum(pi.itervalues())
-        pi = {k:v/float(pisum) for k,v in pi.iteritems()}
+            pi = {k:(v/(lengthdb[k] - (2 * average_read_length))) for k, v in pi.items()}
+        pisum = sum(pi.values())
+        pi = {k:v/float(pisum) for k,v in pi.items()}
         
-        prevPi = {k:v for k, v in prevPi.iteritems() if k in pi}
+        prevPi = {k:v for k, v in prevPi.items() if k in pi}
         dPi = _LogDistDict(pi, prevPi)
          
         i += 1
