@@ -15,7 +15,7 @@ microbiome associates with host health", TBP.
     that this version will not work with GEM3. You need to have the 
     binaries in your PATH variables, so that a simple call to 
     "gem-mapper" would be successful.
-2.  This code was written and tested on python 2.7.8, and requires the following packages:
+2.  This code was written for Python 2.7.8 and has been updated for Python 3 compatibility. It requires the following packages:
     - numpy (tested with 1.14.2)
     - biopython (tested with 1.68)
     - ujson (tested with 1.35)
@@ -24,7 +24,7 @@ microbiome associates with host health", TBP.
     - bokeh (tested with 0.12.6)
 
     If you encounter issues, please try to run in an environment with
-    these packages.
+    these packages or newer versions compatible with Python 3.
 3. It additionally requires c++ 11 and cython installed.
     
 ## Install
@@ -36,7 +36,7 @@ microbiome associates with host health", TBP.
    cat DataFiles.tar.gz.xaa DataFiles.tar.gz.xab DataFiles.tar.gz.xac DataFiles.tar.gz.xad > DataFiles.tar.gz
 ```
 3. Extract DataFiles.tar.gz in the root folder of the project (where this file is located). 
-4. From the ```cy_ext``` subfolder, run ```python setup.py build_ext```.
+4. From the ```cy_ext``` subfolder, run ```python3 setup.py build_ext```.
 
 (DataFiles.tar.gz also available via Zenodo at https://zenodo.org/record/3237975#.XPc0uJxRWhc)
 

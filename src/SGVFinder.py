@@ -35,7 +35,7 @@ def get_sample_map(delta_fname, x_coverage, average_read_length, rate_param):
                 ind2 = int((pos2 + (average_read_length / 2)) / bin_size)
                 bacid_maps[dest_id][ind2] += used_koef
             bacid_maps[dest_id][ind1] += used_koef
-    return {dest_id:cov_map for dest_id, cov_map in bacid_maps.iteritems()\
+    return {dest_id:cov_map for dest_id, cov_map in bacid_maps.items()\
                            if np.median(cov_map) >= rate_param}
 
 def calculate_by_other(old_deldf_p, old_sgvdf_p, old_frames_df, samp_to_map, \
@@ -47,12 +47,12 @@ def calculate_by_other(old_deldf_p, old_sgvdf_p, old_frames_df, samp_to_map, \
     old_sgvdf = read_pickle(old_sgvdf_p)
     
     bac_samps_map = defaultdict(dict)
-    for samp, bacid_maps in samp_to_map.iteritems():
-        for bacname, bacmap in bacid_maps.iteritems():
+    for samp, bacid_maps in samp_to_map.items():
+        for bacname, bacmap in bacid_maps.items():
             bac_samps_map[bacname][samp] = bacmap
     
     bac_bacdf = dict()
-    for bacname, bacdict in bac_samps_map.iteritems():
+    for bacname, bacdict in bac_samps_map.items():
         bacdf = DataFrame(bacdict).T
         bac_bacdf[bacname] = bacdf
     
@@ -121,7 +121,7 @@ def calculate_by_other(old_deldf_p, old_sgvdf_p, old_frames_df, samp_to_map, \
     if weboutputdir is not None:
         taxonomy = read_pickle(taxonomypath)
         genepos = read_pickle(genepospath)
-        for bacname, (normdf, sgvregions, deldf, delsregions_) in matforweb.iteritems():
+        for bacname, (normdf, sgvregions, deldf, delsregions_) in matforweb.items():
             draw_one_region(bacname, binsize, taxonomy, normdf, \
                             deldf, delsregions_, bacdf, sgvregions, weboutputdir, genepos)
     return concat(covregions, axis = 1) if len(covregions) > 0 else DataFrame(), \
@@ -135,7 +135,7 @@ def collect_from_flist(deltaflist, q, dist_reads, x_coverage, average_read_lengt
                    q.method(get_sample_map, (f, dist_reads, x_coverage, \
                                   average_read_length, lengthdbp, \
                                   rate_param, cutoff)) for f in deltaflist}
-    samp_to_map = {k:q.waitforresult(v) for k,v in samp_to_map.iteritems()}
+    samp_to_map = {k:q.waitforresult(v) for k,v in samp_to_map.items()}
     to_pickle(samp_to_map, outp)
 
 def work_on_collection(samp_to_map, min_samp_cutoff, delsdetectthresh, real_del_thresh, dels_cooc_thresh, 
@@ -148,13 +148,13 @@ def work_on_collection(samp_to_map, min_samp_cutoff, delsdetectthresh, real_del_
     taxonomy = read_pickle(taxonomypath)
     genepos = read_pickle(genepospath)
     bac_samps_map = defaultdict(dict)
-    for samp, bacid_maps in samp_to_map.iteritems():
-        for bacname, bacmap in bacid_maps.iteritems():
+    for samp, bacid_maps in samp_to_map.items():
+        for bacname, bacmap in bacid_maps.items():
                 bac_samps_map[bacname][samp] = bacmap
     
     sgvregions_all = []
     delsregions_all = [] 
-    for bacname, bacdict in bac_samps_map.iteritems():
+    for bacname, bacdict in bac_samps_map.items():
         bacdf = DataFrame(bacdict).T
         if bacdf.shape[0] < min_samp_cutoff: continue
         if (bacdf.median() < 1).sum() / float(bacdf.shape[1]) > 0.3:

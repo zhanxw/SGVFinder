@@ -1,7 +1,6 @@
 from GEMWrapperSlim import dope_w_badread_removal, dose_w_badread_removal
 from ICRAUtils import _open_gz_indif, _none_iter, _tryrm
 from gzip import open as opengz
-from itertools import izip
 from Bio import SeqIO  
 from collections import namedtuple
 import ujson
@@ -43,8 +42,8 @@ def _combine_map_files(seqdict, map_fs, outfile, fq_f1, fq_f2=None):
         fq1, fq2, ot = _open_gz_indif(fq_f1), (_open_gz_indif(fq_f2) if fq_f2 is not None else None), opengz(out_f, 'wb')
         map_fs = [open(f) for f in map_fs]
         map_fs_iters = [_stripread(f) for f in map_fs] 
-        map_new_cells = [f.next().split(TAB) for f in map_fs_iters]
-        for r1, r2 in izip(SeqIO.parse(fq1, 'fastq'), (SeqIO.parse(fq2, 'fastq') if fq2 is not None else _none_iter())):
+        map_new_cells = [next(f).split(TAB) for f in map_fs_iters]
+        for r1, r2 in zip(SeqIO.parse(fq1, 'fastq'), (SeqIO.parse(fq2, 'fastq') if fq2 is not None else _none_iter())):
             curid = r1.id.replace('/1', '')
             curr = SourceRead(curid, \
                               [str(r1.seq)] if r2 is None else [str(r1.seq), str(r2.seq)], \
@@ -58,7 +57,7 @@ def _combine_map_files(seqdict, map_fs, outfile, fq_f1, fq_f2=None):
                                          else 1 if r2.description == map_new_cells[i][0] else 2, \
                                          seqdict)
                     try:
-                        map_new_cells[i] = map_fs_iters[i].next().split(TAB)
+                        map_new_cells[i] = next(map_fs_iters[i]).split(TAB)
                     except StopIteration:                     
                         del map_new_cells[i]
                         del map_fs_iters[i]

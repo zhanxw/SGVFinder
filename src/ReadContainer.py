@@ -106,21 +106,21 @@ class ReadContainer(object):
     
     def get_pi(self):
         pi = self._uniq_pi.copy()
-        for temp_reads in self._ambig_rds.itervalues():
+        for temp_reads in self._ambig_rds.values():
             qual_sum = sum(r[r_QUALITY] for r in temp_reads)
             for r in temp_reads:
                 try:
                     pi[r[_r_DEST]] += r[r_QUALITY] / qual_sum
                 except KeyError:
                     pi[r[_r_DEST]] = r[r_QUALITY] / qual_sum
-        return {self._did_to_dest[k]:v for k,v in pi.iteritems()}
+        return {self._did_to_dest[k]:v for k,v in pi.items()}
     
     def get_theta(self):
         win_hard = self._uniq_pi.copy() #win hard differs from pi only in its handling of ambig reads
-        winning_hard = {k:v for k,v in win_hard.iteritems()}
+        winning_hard = {k:v for k,v in win_hard.items()}
         winning_hard['_Minimum'] = 1
         theta1sum = sum(winning_hard.values())
-        return {k:float(v)/theta1sum for k,v in winning_hard.iteritems()}
+        return {k:float(v)/theta1sum for k,v in winning_hard.items()}
     
     def remove_dests(self, dests):
         #some of the dels here are not required, but make the data structure more tidy and slightly smaller (memory-wise)
@@ -165,7 +165,7 @@ class ReadContainer(object):
     def _get_unique_cov_dic(self, pi, lengthdic):
         unique_cov_dic = self._get_empty_cov_dic(pi)
         reduced_len_dct = {self._dest_to_did[k]:lengthdic[k] for k in pi}
-        for did, rdlst in self._did_to_uniq_rds.iteritems():
+        for did, rdlst in self._did_to_uniq_rds.items():
             covmap = unique_cov_dic[did]
             for _, pos1, pos2 in rdlst:
                 _add_read(covmap, pos1, pos2, self.avg_read_length, 1, reduced_len_dct[did])
@@ -185,7 +185,7 @@ class ReadContainer(object):
     
     def _get_empty_cov_dic(self, pi):
         ret = dict()
-        for k_, numreads_ in pi.iteritems():
+        for k_, numreads_ in pi.items():
             numbins = self._define_number_of_bins(numreads_)
             ret[self._dest_to_did[k_]] = np.zeros(numbins)
         return ret
@@ -194,23 +194,23 @@ class ReadContainer(object):
         return max(self.min_bins, min(self.max_bins,int(num_reads/100))) + 2
     
     def _get_cur_cov_dic(self, delta = None):
-        cov_dic = {k:v.copy() for k,v in self._unique_cov_dic.iteritems()}
+        cov_dic = {k:v.copy() for k,v in self._unique_cov_dic.items()}
         if delta is None:
-            for mpings in self._ambig_rds.itervalues():
+            for mpings in self._ambig_rds.values():
                 qualsum = sum(m[r_QUALITY] for m in mpings)
                 for m in mpings:
                     _add_read(cov_dic[m[_r_DEST]], m[r_POS1], m[r_POS2], self.avg_read_length, \
                               m[r_QUALITY] / qualsum, self._reduced_len_dct[m[_r_DEST]])
         else:
-            for mpings in delta.itervalues():
-                for (did, pos1, pos2), koef in mpings.iteritems():
+            for mpings in delta.values():
+                for (did, pos1, pos2), koef in mpings.items():
                     _add_read(cov_dic[did], pos1, pos2, self.avg_read_length, koef, self._reduced_len_dct[did])
         return cov_dic
     
     def get_dense_region_coverage_pi(self, perc, delta = None):
         newpi = {}
         self.curcovdic = self._get_cur_cov_dic(delta)
-        for did, curcovmap in self.curcovdic.iteritems():
+        for did, curcovmap in self.curcovdic.items():
             arr = curcovmap[1:-1]
             arr.sort()
             region_size = int(np.ceil(len(arr)* perc / 100.0)) 
@@ -222,34 +222,34 @@ class ReadContainer(object):
         METHOD_OLD = False
         delta = dict() 
         if use_theta:
-            for did in self._did_to_dest.iterkeys():
+            for did in self._did_to_dest.keys():
                 if did not in theta1:
                     theta1[did] = theta1['_Minimum']
-        pi = {self._dest_to_did[k]:v for k,v in pi.iteritems()}
-        for rrid, mpngs in self._ambig_rds.iteritems():
+        pi = {self._dest_to_did[k]:v for k,v in pi.items()}
+        for rrid, mpngs in self._ambig_rds.items():
             if use_theta:
                 noms = {(did, pos1, pos2): pi[did] * theta1[did] * qual for qual, pos1, pos2, did in mpngs}
             else:
                 noms = {(did, pos1, pos2): pi[did] * qual for qual, pos1, pos2, did in mpngs}
             if METHOD_OLD:
-                noms = {k:v for k,v in noms.iteritems() if v >= epsilon}
+                noms = {k:v for k,v in noms.items() if v >= epsilon}
             else:
-                denom = sum(noms.itervalues())
-                noms = {k:v for k,v in noms.iteritems() if v/denom >= epsilon}
-            denom = sum(noms.itervalues()) 
-            delta[rrid] = {k:v/denom for k,v in noms.iteritems()}
+                denom = sum(noms.values())
+                noms = {k:v for k,v in noms.items() if v/denom >= epsilon}
+            denom = sum(noms.values()) 
+            delta[rrid] = {k:v/denom for k,v in noms.items()}
         return delta
     
     def get_full_delta(self, pi, theta1, epsilon, use_theta):
         delta = [(self._rrid_to_rid[rrid],((self._did_to_dest[did], pos1, pos2, 1, 1),)) \
-                for did, uniq_rds in self._did_to_uniq_rds.iteritems() \
+                for did, uniq_rds in self._did_to_uniq_rds.items() \
                 for rrid, pos1, pos2 in uniq_rds]
         if use_theta:
-            for did in self._did_to_dest.iterkeys():
+            for did in self._did_to_dest.keys():
                 if did not in theta1:
                     theta1[did] = theta1['_Minimum']
-        pi = {self._dest_to_did[k]:v for k,v in pi.iteritems()}
-        for rrid, mpngs in self._ambig_rds.iteritems():
+        pi = {self._dest_to_did[k]:v for k,v in pi.items()}
+        for rrid, mpngs in self._ambig_rds.items():
             if use_theta:
                 noms = tuple((self._did_to_dest[did], pos1, pos2, pi[did] * theta1[did] * qual, qual) for qual, pos1, pos2, did in mpngs)
             else:
