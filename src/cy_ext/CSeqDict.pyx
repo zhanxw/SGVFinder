@@ -8,6 +8,20 @@ from cpython.mem cimport PyMem_Malloc, PyMem_Free
 import ujson
 from os.path import splitext
 
+# Declare the C++ class
+cdef extern from *:
+    """
+    struct SeqIDLL {
+        std::string name;
+        SeqIDLL *newer;
+        SeqIDLL *older;
+    };
+    """
+    cdef cppclass SeqIDLL:
+        string name
+        SeqIDLL *newer
+        SeqIDLL *older
+
 cdef char *basemap = <char *>PyMem_Malloc(255 * cython.sizeof(char))
 cdef int c_i = 0
 while c_i < 255:
@@ -44,7 +58,7 @@ cpdef int test(string n) except -1:
 cdef char * revcomp(unsigned char *seq, long seqlen):
     cdef char *ret = <char *> PyMem_Malloc(seqlen * cython.sizeof(char) + 1) 
     if ret == NULL:
-        print 'mem in revcomp'
+        print('mem in revcomp')
     cdef long i = 0
     while i < seqlen:
         ret[i] = basemap[seq[seqlen-i-1]]
@@ -55,17 +69,28 @@ cdef char * revcomp(unsigned char *seq, long seqlen):
 cdef SeqIDLL *EMPTY
 
 cdef class CSeqDict:
+    cdef unordered_map[string, char *] _dct
+    cdef unordered_map[string, char *] _revdct
+    cdef unordered_map[string, long] _lendct
+    cdef unordered_map[string, long] _idx 
+    cdef unordered_map[string, SeqIDLL *] _cppcq
+    cdef long _cursum, _lim
+    cdef FILE* _file
+    cdef SeqIDLL *newest
+    cdef SeqIDLL *oldest
     
     def __init__(self, pth, lim = None):
         with open(splitext(pth)[0] + '.lens') as ol:
-            for k, v in ujson.load(ol).iteritems():
+            for k, v in ujson.load(ol).items():
                 self._lendct[k] = v 
         with open(splitext(pth)[0] + '.idx') as o:
-            for k, v in ujson.load(o).iteritems():
+            for k, v in ujson.load(o).items():
                 self._idx[k] = v
         self._cursum = 0
         self._lim = lim
-        self._file = fopen(pth, "rb")
+        # Convert Python 3 string to bytes for C function
+        cdef bytes pth_bytes = pth.encode('UTF-8') if isinstance(pth, str) else pth
+        self._file = fopen(pth_bytes, b"rb")
         if self._file == NULL:
             raise Exception(2, "No such file or directory: '%s'" % pth)
     

@@ -55,11 +55,11 @@ def do_delta(pi, theta1, read_container, includedbacs, epsilon_method, max_misma
                 delta[read_id][(dest,read[r_POS1],read[r_POS2])] += readprod
                 denom_delta_for_read += readprod
             i_ += 1
-        for germ in delta[read_id].iterkeys():
+        for germ in delta[read_id].keys():
             delrid = delta[read_id][germ] 
             if delrid < epsilon:
                 denom_delta_for_read -= delrid
-        for germ in delta[read_id].iterkeys():
+        for germ in delta[read_id].keys():
             delrid = delta[read_id][germ] 
             if delrid < epsilon: 
                 delta[read_id][germ] = 0
