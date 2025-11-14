@@ -69,15 +69,6 @@ cdef char * revcomp(unsigned char *seq, long seqlen):
 cdef SeqIDLL *EMPTY
 
 cdef class CSeqDict:
-    cdef unordered_map[string, char *] _dct
-    cdef unordered_map[string, char *] _revdct
-    cdef unordered_map[string, long] _lendct
-    cdef unordered_map[string, long] _idx 
-    cdef unordered_map[string, SeqIDLL *] _cppcq
-    cdef long _cursum, _lim
-    cdef FILE* _file
-    cdef SeqIDLL *newest
-    cdef SeqIDLL *oldest
     
     def __init__(self, pth, lim = None):
         with open(splitext(pth)[0] + '.lens') as ol:
