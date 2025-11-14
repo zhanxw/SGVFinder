@@ -74,7 +74,7 @@ cdef int * create_gigar_array_ptr(char * gigar, int * size):
                 value -= 1
     cdef int * res = < int *> PyMem_Malloc(h_i * cython.sizeof(int))
     if res == NULL:
-        print 'memory in create_gi_array'
+        print('memory in create_gi_array')
     _v = 0
     while _v < h_i:
         res[_v] = _help[_v]
@@ -108,7 +108,7 @@ cdef int * opt_hamming_gigar_arr(char * seq, char * genesq, int rstart, int rend
     cdef int i = 0
     cdef int * res = < int *> PyMem_Malloc((rend - rstart) * cython.sizeof(int))
     if res == NULL:
-        print 'memory in opt hamming'
+        print('memory in opt hamming')
     while i + rstart < rend:
         if i + rstart < 0 or i + rstart > lgsq or seq[i] != genesq[i + rstart]:
             res[i] = TEN

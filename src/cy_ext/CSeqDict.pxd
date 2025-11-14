@@ -8,7 +8,7 @@ from cpython.mem cimport PyMem_Malloc, PyMem_Free
 import ujson
 from os.path import splitext
 
-cpdef cppclass SeqIDLL:
+cdef cppclass SeqIDLL:
     string name
     SeqIDLL *newer
     SeqIDLL *older
